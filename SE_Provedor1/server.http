@@ -1,0 +1,11 @@
+### Prueba POST 
+### /productos/actualizarInventario
+POST http://localhost:81/productos/actualizarInventario HTTP/1.1
+content-type: application/json
+
+[
+    {
+        "id": "650539fb3c10b45b4626ff82",
+        "qty": 1 
+    }
+]
