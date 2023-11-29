@@ -1,15 +1,13 @@
-const express = require('express');
-const AdminRouter = require('../../routers/AdminRouter');
-const ProveedorRouter = require('../../routers/ProveedorRouter');
-const ContratoRouter = require('../../routers/ContratoRouter');
-const BodyParser = require('body-parser');
+import express from 'express';
+import UserGUIRouter from '../../routers/UserGUIRouter.js';
+import ProductosRouter from '../../routers/ProductosRouter.js';
+import BodyParser from 'body-parser';
 
 const app = express();
 
 app.use(BodyParser.json());
 
-app.use('/proveedores', AdminRouter);
-app.use('/api/v1/proveedores', ProveedorRouter);
-app.use('/api/v1/contratos', ContratoRouter);
+app.use('/', UserGUIRouter);
+app.use('/productos', ProductosRouter);
 
-module.exports = app;
+export default app;

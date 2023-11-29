@@ -13,10 +13,3 @@ process.on('SIGINT', async function() {
     console.log("conección con BD cerradaa."); 
     process.exit(0); 
 });
-
-process.on('SIGTERM', async function() {
-    let clienteMongo = ClienteMongo.getInstance();
-    await clienteMongo.cliente.close();
-    console.log("conección con BD cerrada por nodemon.");
-    process.exit(0);
-});

@@ -6,7 +6,7 @@ const ProveedorRouter = express.Router();
 
 ProveedorRouter.get('/:id', async (req, res) => {
     let id = req.params.id;
-    let embed = req.query.embed;
+    let embed = req.query.embed || false;
     let proveedor = null;
 
     try {

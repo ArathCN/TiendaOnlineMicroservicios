@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+import { MongoClient, ServerApiVersion } from "mongodb";
 
 class ClienteMongo {
     constructor() {
@@ -39,4 +39,4 @@ class ClienteMongoSingleton {
     //     ClienteMongoSingleton.instance
     // }
 }
-module.exports = ClienteMongoSingleton;
+export default ClienteMongoSingleton;
