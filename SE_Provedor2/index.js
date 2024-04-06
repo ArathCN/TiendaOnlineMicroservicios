@@ -11,7 +11,7 @@ app.use(body_parser.json());
 app.use('/productos', routerProductos);
 
 app.listen(process.env.PORT, () => {
-    console.log("App 'Proveedor 1' escuchando el puerto: " + process.env.PORT);
+    console.log("App 'Proveedor 2' escuchando el puerto: " + process.env.PORT);
 })
 
 

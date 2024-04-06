@@ -10,7 +10,7 @@ class ClienteMongo {
             }
         });
         //this.cliente.connect();
-        this.db = this.cliente.db("SE_Proveedor1");
+        this.db = this.cliente.db("SE_Proveedor2");
 
         this.crearIndexes();
     }

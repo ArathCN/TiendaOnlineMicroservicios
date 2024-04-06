@@ -81,7 +81,15 @@ class ProductosService {
         let todosProductos = new Array();
 
         //Obtener los proveedores
-        proveedores = await ProveedorService.obtenerProveedores();
+        try {
+            proveedores = await ProveedorService.obtenerProveedores();
+        } catch (error) {
+            if(error.response) throw new Error(error.response.data.mensaje);
+            else if (error.request) throw new Error("No se recibió respuesta del servicio de Proveedores");
+            else throw error;
+        }
+        if(!proveedores.length) throw new Error("No se encontraron proveedores");
+
         let productosXProveedor = Math.floor(pageSize / proveedores.length);
     
         for await (const proveedor of proveedores) {

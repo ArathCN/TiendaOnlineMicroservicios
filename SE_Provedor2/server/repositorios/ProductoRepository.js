@@ -36,37 +36,67 @@ class ProductoRepository {
         const skip = PaginationConstants.PAGE_SIZE * pagination.page;
         const limit = PaginationConstants.PAGE_SIZE;
 
-        let match = "";
-        let facet = "";
-        let project1 = "";
-        let addFields = "";
-        let project2 = "";
+        let agg = [
+          {
+            $facet: {
+              metadata: [
+                {
+                  $group: {
+                    _id: null,
+                    total: { $sum: 1 }
+                  }
+                }
+              ],
+              data: [
+                { $sort: { [sort]: 1 } },
+                { $skip: skip },
+                { $limit: limit }
+              ]
+            }
+          },
+          {
+            $project: {
+              data: 1,
+              meta: {
+                total: {
+                  $arrayElemAt: ['$metadata.total', 0]
+                },
+                pageSize: { $size: '$data' },
+                page: { $literal: pagination.page }
+              }
+            }
+          },
+          {
+            $project: {
+              data: 1,
+              'meta.total': 1,
+              'meta.page': 1,
+              'meta.pageSize': 1,
+              "meta.pages": {
+                $subtract: [{$ceil: {
+                    $divide: [
+                      "$meta.total",
+                      10,
+                    ],
+                  }}, 1],
+              }
+            }
+          }
+        ];
 
-        let meta = [];
         if (filters !== undefined) {
-            const keywords = filters.keywords;
-            match = `{"$match": {"$text": {"$search": "${keywords}"}}}`;
-            match = JSON.parse(match);
-            meta.push(match);
-        }
-
-        facet = `{"$facet": {"metadata": [{ "$group": { "_id": null, "total": { "$sum": 1 }}}], "data": [ { "$sort": {"${sort}": 1} },{ "$skip": ${skip} },{ "$limit": ${limit} }]}}`;
-        project1 = `{"$project": {"data": 1, "meta": {"total": {"$arrayElemAt": ["$metadata.total", 0]}}}}`;
-        addFields = `{"$addFields": {"meta.pageSize": ${limit}, "meta.page": ${pagination.page}}}`;
-        project2 = `{"$project": {"data": 1, "meta.total": 1, "meta.page": 1, "meta.pageSize": 1, "meta.pages": {"$round": [{"$divide": ["$meta.total", "$meta.pageSize"]}, 0]}}}`;
+          const keywords = filters.keywords;
+          let match = {
+            $match: {
+              $text: {
+                $search: keywords
+              }
+            }
+          };
+          agg.unshift(match);
+      }
         
-
-        facet = JSON.parse(facet);
-        project1 = JSON.parse(project1);
-        addFields = JSON.parse(addFields);
-        project2 = JSON.parse(project2);
-
-        meta.push(facet);
-        meta.push(project1);
-        meta.push(addFields);
-        meta.push(project2);
-        
-        const cursor = this.coleccion.aggregate(meta);
+        const cursor = this.coleccion.aggregate(agg);
         
         let coleccion;
         for await (const dato of cursor) {
@@ -95,7 +125,7 @@ class ProductoRepository {
       let resultado = await this.cliente.cliente.withSession(async (session) =>
         session.withTransaction(async (session) => {
           let responses = [];
-          const col = this.cliente.cliente.db('SE_Proveedor1').collection('productos');
+          const col = this.cliente.cliente.db('SE_Proveedor2').collection('productos');
 
           for (const producto of productos) {
             let query = { _id: new ObjectId(producto._id) };

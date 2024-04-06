@@ -5,7 +5,7 @@ const ContratoService = {
         let respuesta;
 
         try {
-            respuesta = await ContratoService.create(contrato);
+            respuesta = await ContratoRepository.create(contrato);
         } catch (error) {
             throw error;
         }
@@ -16,7 +16,7 @@ const ContratoService = {
     readById: async (id) => {
         let contrato;
         try {
-            contrato = await ContratoService.readById(id);
+            contrato = await ContratoRepository.readById(id);
         } catch (error) {
             throw error;
         }
@@ -24,11 +24,11 @@ const ContratoService = {
         return contrato;
     },
 
-    update: async (contrato) => {
+    update: async (id, operaciones) => {
         let respuesta;
 
         try {
-            respuesta =  await ContratoService.update(contrato);
+            respuesta =  await ContratoRepository.update(id, operaciones);
         } catch (error) {
             throw error;
         }

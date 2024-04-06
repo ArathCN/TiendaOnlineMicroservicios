@@ -12,14 +12,14 @@ class ClienteMongo {
 
         this.db = this.cliente.db("TO_Proveedores");
 
-        //this.crearIndexes();
+        this.crearIndexes();
     }
 
     async crearIndexes () {
-        let textIndex_productos = {"name": "text", "category": "text", "description": "text"};
-        let textIndex_opcions_productos = {"default_language": "es", "weights": {"name": 10, "category": 5}};
+        let textIndex_productos = {"name": "text"};
+        let textIndex_opcions_productos = {"default_language": "es", "weights": {"name": 10}};
 
-        const productos = this.db.collection("productos");
+        const productos = this.db.collection("proveedores");
 
         const res = await productos.createIndex(textIndex_productos, textIndex_opcions_productos);
     }

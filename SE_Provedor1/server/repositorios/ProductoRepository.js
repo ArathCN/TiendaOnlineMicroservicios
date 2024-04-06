@@ -32,48 +32,78 @@ class ProductoRepository {
     }
 
     async readMany (pagination, filters) {
-        const sort = pagination.sort;
-        const skip = PaginationConstants.PAGE_SIZE * pagination.page;
-        const limit = PaginationConstants.PAGE_SIZE;
+      const sort = pagination.sort;
+      const skip = PaginationConstants.PAGE_SIZE * pagination.page;
+      const limit = PaginationConstants.PAGE_SIZE;
 
-        let match = "";
-        let facet = "";
-        let project1 = "";
-        let addFields = "";
-        let project2 = "";
-
-        let meta = [];
-        if (filters !== undefined) {
-            const keywords = filters.keywords;
-            match = `{"$match": {"$text": {"$search": "${keywords}"}}}`;
-            match = JSON.parse(match);
-            meta.push(match);
+      let agg = [
+        {
+          $facet: {
+            metadata: [
+              {
+                $group: {
+                  _id: null,
+                  total: { $sum: 1 }
+                }
+              }
+            ],
+            data: [
+              { $sort: { [sort]: 1 } },
+              { $skip: skip },
+              { $limit: limit }
+            ]
+          }
+        },
+        {
+          $project: {
+            data: 1,
+            meta: {
+              total: {
+                $arrayElemAt: ['$metadata.total', 0]
+              },
+              pageSize: { $size: '$data' },
+              page: { $literal: pagination.page }
+            }
+          }
+        },
+        {
+          $project: {
+            data: 1,
+            'meta.total': 1,
+            'meta.page': 1,
+            'meta.pageSize': 1,
+            "meta.pages": {
+              $subtract: [{$ceil: {
+                  $divide: [
+                    "$meta.total",
+                    10,
+                  ],
+                }}, 1],
+            }
+          }
         }
+      ];
 
-        facet = `{"$facet": {"metadata": [{ "$group": { "_id": null, "total": { "$sum": 1 }}}], "data": [ { "$sort": {"${sort}": 1} },{ "$skip": ${skip} },{ "$limit": ${limit} }]}}`;
-        project1 = `{"$project": {"data": 1, "meta": {"total": {"$arrayElemAt": ["$metadata.total", 0]}}}}`;
-        addFields = `{"$addFields": {"meta.pageSize": ${limit}, "meta.page": ${pagination.page}}}`;
-        project2 = `{"$project": {"data": 1, "meta.total": 1, "meta.page": 1, "meta.pageSize": 1, "meta.pages": {"$round": [{"$divide": ["$meta.total", "$meta.pageSize"]}, 0]}}}`;
-        
-
-        facet = JSON.parse(facet);
-        project1 = JSON.parse(project1);
-        addFields = JSON.parse(addFields);
-        project2 = JSON.parse(project2);
-
-        meta.push(facet);
-        meta.push(project1);
-        meta.push(addFields);
-        meta.push(project2);
-        
-        const cursor = this.coleccion.aggregate(meta);
-        
-        let coleccion;
-        for await (const dato of cursor) {
-            const pag = new PaginationResponse(dato.meta.total, dato.meta.pageSize, dato.meta.page, dato.meta.pages);
-            coleccion = new CollectionResponse(dato.data, pag);
-        }
-        return coleccion;
+      if (filters !== undefined) {
+        const keywords = filters.keywords;
+        let match = {
+          $match: {
+            $text: {
+              $search: keywords
+            }
+          }
+        };
+        agg.unshift(match);
+      }
+      
+      const cursor = this.coleccion.aggregate(agg);
+      
+      let coleccion;
+      for await (const dato of cursor) {
+          const pag = new PaginationResponse(dato.meta.total, dato.meta.pageSize, dato.meta.page, dato.meta.pages);
+          coleccion = new CollectionResponse(dato.data, pag);
+      }
+      return coleccion;
     }
 
     async updateOne (producto){

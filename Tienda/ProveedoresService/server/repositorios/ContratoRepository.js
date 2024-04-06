@@ -1,5 +1,6 @@
 const ClienteMongo = require('../modelos/BO/ClienteMongo');
 const {ObjectId} = require('mongodb');
+const { updatesForPatch } = require('rfc6902-mongodb');
 
 const cliente = ClienteMongo.getInstance();
 
@@ -27,29 +28,22 @@ const ContratoRepository = {
         return contrato;
     },
 
-    "update": async (contrato) => {
+    "update": async (id, operaciones) => {
+
         let query = {
-          "_id": new ObjectId(contrato._id)
+            "_id": new ObjectId(id)
         };
 
-        let update = {
-            $set: {
-                "host": contrato.host,
-                "path": contrato.path,
-                "authentication": contrato.authentication,
-                "endpoints": contrato.endpoints
-            }
-        };
+        let contrato = await ContratoRepository.readById(id);
+        if(!contrato) throw new Error("Contrato no encontrado");
 
-        let respuesta;
+        const updates = updatesForPatch(operaciones, contrato);
+        console.log(updates[0]);
 
-        try {
-            respuesta = await ContratoRepository.coleccion.updateOne(query, update);
-        } catch (error) {
-            throw error;
-        }
+        let res = await ContratoRepository.coleccion.updateOne(query, updates[0]);
 
-        return respuesta;
+        
+        return res;
     }
 }
 

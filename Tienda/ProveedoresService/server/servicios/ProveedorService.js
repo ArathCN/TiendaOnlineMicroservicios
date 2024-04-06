@@ -48,18 +48,6 @@ const ProveedorService = {
         return proveedores;
     },
 
-    update: async (proveedor) => {
-        let respuesta;
-
-        try {
-            respuesta =  await ProveedorRepository.update(proveedor);
-        } catch (error) {
-            throw error;
-        }
-
-        return respuesta;
-    },
-
     delete: async (id) => {
         let respuesta;
 

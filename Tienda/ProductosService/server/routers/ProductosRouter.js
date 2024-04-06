@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import ProductosService from '../servicios/ProductosService.js';
+import Joi from 'joi';
 
 const ProductosRouter = Router();
 const PRODUCTOS_PAGINA = 30;
@@ -16,7 +17,7 @@ ProductosRouter.get('/', async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500);
-        res.send({"message": error.message});
+        res.send({"status": "ERROR", "message": error.message});
         return;
     }
 
