@@ -1,8 +1,5 @@
 const ProductoRepository = require('../repositorios/ProductoRepository');
-const Measures = require('../modelos/DTO/Measures');
-const Producto = require('../modelos/DTO/Producto');
 const HttpError = require('../error/HttpError');
-//const Pagination = require('../modelos/BO/Pagination');
 
 class ProductoService {
     constructor () {
